@@ -69,53 +69,32 @@ backend letsencrypt_backend
 
 ## Zertifikate mit acme.sh erstellen
 
-### Zigbee2MQTT Domains
+### Schritt 1: Zertifikat erzeugen
 ```
-acme.sh --issue --standalone --httpport 8800 -d zigbee2mqtt-1.domain.ltd
-acme.sh --issue --standalone --httpport 8800 -d zigbee2mqtt-2.domain.ltd
-acme.sh --issue --standalone --httpport 8800 -d zigbee2mqtt-3.domain.ltd
-```
-
-### qiskit Domain
-```
-acme.sh --issue --standalone --httpport 8800 -d qiskit.domain.ltd
+acme.sh --issue --standalone --httpport 8800 -d sub.domain.ltd
 ```
 
 ---
 
-## Zertifikate installieren
-
-### Zigbee2MQTT
+### Schritt 2: Zertifikat in HAProxy-Ordner installieren
 ```
-acme.sh --install-cert -d zigbee2mqtt-1.domain.ltd   --key-file /etc/haproxy/certs/zigbee2mqtt-1.domain.ltd.key   --fullchain-file /etc/haproxy/certs/zigbee2mqtt-1.domain.ltd.pem   --reloadcmd "systemctl reload haproxy"
-
-acme.sh --install-cert -d zigbee2mqtt-2.domain.ltd   --key-file /etc/haproxy/certs/zigbee2mqtt-2.domain.ltd.key   --fullchain-file /etc/haproxy/certs/zigbee2mqtt-2.domain.ltd.pem   --reloadcmd "systemctl reload haproxy"
-
-acme.sh --install-cert -d zigbee2mqtt-3.domain.ltd   --key-file /etc/haproxy/certs/zigbee2mqtt-3.domain.ltd.key   --fullchain-file /etc/haproxy/certs/zigbee2mqtt-3.domain.ltd.pem   --reloadcmd "systemctl reload haproxy"
+acme.sh --install-cert -d sub.domain.ltd \
+  --key-file /etc/haproxy/certs/sub.domain.ltd.key \
+  --fullchain-file /etc/haproxy/certs/sub.domain.ltd.pem \
+  --reloadcmd "systemctl reload haproxy"
 ```
 
-### qiskit-domain
-```
-acme.sh --install-cert -d qiskit.domain.ltd   --key-file /etc/haproxy/certs/qiskit.domain.ltd.key   --fullchain-file /etc/haproxy/certs/qiskit.domain.ltd.pem   --reloadcmd "systemctl reload haproxy"
-```
-
----
-
-## Key und Zertifikat zusammenführen
+### Schritt 3: Key und Zertifikat zu einer HAProxy-Datei zusammenführen
 ```
 cd /etc/haproxy/certs
+cat sub.domain.ltd.key sub.domain.ltd.pem >sub.domain.ltd.pem.tmp
+mv sub.domain.ltd.pem.tmp sub.domain.ltd.pem
+```
 
-cat zigbee2mqtt-1.domain.ltd.key zigbee2mqtt-1.domain.ltd.pem > zigbee2mqtt-1.domain.ltd.pem.tmp
-mv zigbee2mqtt-1.domain.ltd.pem.tmp zigbee2mqtt-1.domain.ltd.pem
-
-cat zigbee2mqtt-2.domain.ltd.key zigbee2mqtt-2.domain.ltd.pem > zigbee2mqtt-2.domain.ltd.pem.tmp
-mv zigbee2mqtt-2.domain.ltd.pem.tmp zigbee2mqtt-2.domain.ltd.pem
-
-cat zigbee2mqtt-3.domain.ltd.key zigbee2mqtt-3.domain.ltd.pem > zigbee2mqtt-3.domain.ltd.pem.tmp
-mv zigbee2mqtt-3.domain.ltd.pem.tmp zigbee2mqtt-3.domain.ltd.pem
-
-cat qiskit.domain.ltd.key qiskit.domain.ltd.pem > qiskit.domain.ltd.pem.tmp
-mv qiskit.domain.ltd.pem.tmp qiskit.domain.ltd.pem
+### HAProxy testen und neu laden
+```
+haproxy -c -f /etc/haproxy/haproxy.cfg
+systemctl reload haproxy
 ```
 
 ---
