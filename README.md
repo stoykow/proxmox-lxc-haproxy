@@ -150,6 +150,10 @@ acme.sh --install-cert -d service1.domain.ltd \
 
 acme.sh erzeugt automatisch einen Cronjob.
 
+cd /etc/haproxy/certs
+cat qiskit.domain.ltd.key qiskit.domain.ltd.pem > qiskit.domain.ltd.pem.tmp
+mv qiskit.domain.ltd.pem.tmp qiskit.domain.ltd.pem
+
 ---
 
 ## 9. Routing-Beispiele
