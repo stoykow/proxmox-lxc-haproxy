@@ -92,7 +92,7 @@ Datei:
 /etc/haproxy/haproxy.cfg
 
 Beispiel:
-
+```
 frontend http_in
     bind *:80
     mode http
@@ -125,7 +125,7 @@ backend https_passthrough_backend
 backend letsencrypt_backend
     mode http
     server localhost 127.0.0.1:8800
-
+```
 ---
 
 ## 7. Let's Encrypt (acme.sh)
@@ -153,6 +153,51 @@ acme.sh erzeugt automatisch einen Cronjob.
 cd /etc/haproxy/certs
 cat qiskit.domain.ltd.key qiskit.domain.ltd.pem > qiskit.domain.ltd.pem.tmp
 mv qiskit.domain.ltd.pem.tmp qiskit.domain.ltd.pem
+
+
+Proxy Backends für Zigbee2MQTT
+```
+    backend zigbee2mqtt-1_backend
+        mode http
+        server z2m1 192.168.112.30:8100 check
+
+    backend zigbee2mqtt-2_backend
+        mode http
+        server z2m2 192.168.112.30:8101 check
+
+    backend zigbee2mqtt-3_backend
+        mode http
+        server z2m3 192.168.112.30:8102 check
+```
+Zertifikate mit acme.sh holen
+```
+    acme.sh --issue --standalone --httpport 8800 -d zigbee2mqtt-1.domain.de
+    acme.sh --issue --standalone --httpport 8800 -d zigbee2mqtt-2.domain.de
+    acme.sh --issue --standalone --httpport 8800 -d zigbee2mqtt-3.domain.de
+```
+Zertifikate installieren
+```
+    acme.sh --install-cert -d zigbee2mqtt-1.domain.de   --key-file /etc/haproxy/certs/zigbee2mqtt-1.domain.de.key   --fullchain-file /etc/haproxy/certs/zigbee2mqtt-1.domain.de.pem   --reloadcmd "systemctl reload haproxy"
+
+    acme.sh --install-cert -d zigbee2mqtt-2.domain.de   --key-file /etc/haproxy/certs/zigbee2mqtt-2.domain.de.key   --fullchain-file /etc/haproxy/certs/zigbee2mqtt-2.domain.de.pem   --reloadcmd "systemctl reload haproxy"
+
+    acme.sh --install-cert -d zigbee2mqtt-3.domain.de   --key-file /etc/haproxy/certs/zigbee2mqtt-3.domain.de.key   --fullchain-file /etc/haproxy/certs/zigbee2mqtt-3.domain.de.pem   --reloadcmd "systemctl reload haproxy"
+```
+Schlüssel und Zertifikat zu einer Datei zusammenführen
+```
+    cd /etc/haproxy/certs
+
+    cat zigbee2mqtt-1.domain.de.key zigbee2mqtt-1.domain.de.pem > zigbee2mqtt-1.domain.de.pem.tmp
+    mv zigbee2mqtt-1.domain.de.pem.tmp zigbee2mqtt-1.domain.de.pem
+
+    cat zigbee2mqtt-2.domain.de.key zigbee2mqtt-2.domain.de.pem > zigbee2mqtt-2.domain.de.pem.tmp
+    mv zigbee2mqtt-2.domain.de.pem.tmp zigbee2mqtt-2.domain.de.pem
+
+    cat zigbee2mqtt-3.domain.de.key zigbee2mqtt-3.domain.de.pem > zigbee2mqtt-3.domain.de.pem.tmp
+    mv zigbee2mqtt-3.domain.de.pem.tmp zigbee2mqtt-3.domain.de.pem
+```
+
+
 
 ---
 
